@@ -17,7 +17,6 @@ package org.fixtrading.orchestra.session;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLClassAssertionAxiom;
 import org.semanticweb.owlapi.model.OWLDataProperty;
@@ -49,7 +48,7 @@ public class SessionToolWithOuch extends AbstractSessionTool {
   }
 
   public Session getSession(String sessionName) {
-    OWLNamedIndividual session = getInstance(getPrefix() + ":" + sessionName);
+    OWLNamedIndividual session = getDataFactory().getOWLNamedIndividual("sessions/" + sessionName, getPrefixManager());
     return new OuchSessionObject(session);
   }
 
@@ -63,16 +62,16 @@ public class SessionToolWithOuch extends AbstractSessionTool {
   }
 
   protected OWLClass getSessionClass() {
-    OWLClass subClass = getDataFactory().getOWLClass(":OuchSession", getPrefixManager());
-    OWLClass superClass = getDataFactory().getOWLClass(":Session", getPrefixManager());
+    OWLClass subClass = getDataFactory().getOWLClass(":OuchSession", getDefaultPrefixManager());
+    OWLClass superClass = getDataFactory().getOWLClass(":Session", getDefaultPrefixManager());
     OWLSubClassOfAxiom axiom = getDataFactory().getOWLSubClassOfAxiom(subClass, superClass);
     getOntologyManager().addAxiom(getDerivedModel(), axiom);
     return subClass;
   }
 
   protected OWLClass getSessionProtocolClass() {
-    OWLClass subClass = getDataFactory().getOWLClass(":SoupBinTcp", getPrefixManager());
-    OWLClass superClass = getDataFactory().getOWLClass(":SessionProtocol", getPrefixManager());
+    OWLClass subClass = getDataFactory().getOWLClass(":SoupBinTcp", getDefaultPrefixManager());
+    OWLClass superClass = getDataFactory().getOWLClass(":SessionProtocol", getDefaultPrefixManager());
     OWLSubClassOfAxiom axiom = getDataFactory().getOWLSubClassOfAxiom(subClass, superClass);
     getOntologyManager().addAxiom(getDerivedModel(), axiom);
     return subClass;
@@ -88,13 +87,14 @@ public class SessionToolWithOuch extends AbstractSessionTool {
     OWLClass sessionClass = getSessionClass();
 
     OWLObjectProperty hasProperty =
-        getDataFactory().getOWLObjectProperty(":has", getPrefixManager());
+        getDataFactory().getOWLObjectProperty(":has", getDefaultPrefixManager());
 
     OWLDataProperty hasTextIdentifierProperty =
-        getDataFactory().getOWLDataProperty(":hasTextIdentifer", getPrefixManager());
+        getDataFactory().getOWLDataProperty(":hasTextIdentifer", getDefaultPrefixManager());
 
     OWLNamedIndividual session =
-        getDataFactory().getOWLNamedIndividual(IRI.create(getDerivedIRI().toString(), sessionName));
+      	getDataFactory().getOWLNamedIndividual("sessions/" + sessionName, getPrefixManager());
+
     OWLClassAssertionAxiom classAssertion =
         getDataFactory().getOWLClassAssertionAxiom(sessionClass, session);
     getOntologyManager().addAxiom(getDerivedModel(), classAssertion);
@@ -105,8 +105,9 @@ public class SessionToolWithOuch extends AbstractSessionTool {
 
     OWLClass sessionProtocolClass = getSessionProtocolClass();
 
-    OWLNamedIndividual sessionProtocol = getDataFactory().getOWLNamedIndividual(
-        IRI.create(getDerivedIRI().toString(), sessionName + "/sessionProtocol"));
+    OWLNamedIndividual sessionProtocol = getDataFactory()
+    		.getOWLNamedIndividual("sessionProtocols/" + sessionName, getPrefixManager());
+
     classAssertion =
         getDataFactory().getOWLClassAssertionAxiom(sessionProtocolClass, sessionProtocol);
     getOntologyManager().addAxiom(getDerivedModel(), classAssertion);
